@@ -5,7 +5,7 @@ import cv2
 class Component():
 
     def __init__(self):
-        bool : self.__visible = True
+        self.__visible : bool = True
         pass
 
     @property
@@ -22,7 +22,7 @@ class Component():
 
     def draw(self, img) -> np.array:
         if self.visible:
-            return self.draw(img)
+            return self.show(img)
         else:
             return img
 
@@ -32,17 +32,20 @@ class Component():
 
 class TitleComponent(Component):
 
-    def __init__(self, pos, text):
+    def __init__(self, text, pos):
+        super().__init__()
         self.text = text
         self.pos  = pos
 
     def show(self, img) -> np.array:
+        print("TEXT = ", self.text)
         img = cv2.putText(img, self.text, self.pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
     
 class HistogramComponent(Component):
 
     def __init__(self, hist):
+        super().__init__()
         self.hist = hist
 
     def show(self, img) -> np.array:
@@ -51,6 +54,7 @@ class HistogramComponent(Component):
 class NumberComponent(Component):
 
     def __init__(self, pos, num, val):
+        super().__init__()
         self.pos = pos
         self.num = num
         self.val = val

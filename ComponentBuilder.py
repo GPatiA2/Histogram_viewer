@@ -7,55 +7,17 @@ from Filter import *
 
 class ComponentBuilder:
 
-    CHANNEL_FILTERS = ["single", "all"]
-    COMPONENT_FILTERS = ["histogram", "title"]
-    EDGE_DENOIS_FILTERS = ["laplacian", "gauss_blur"]
-
     def __init__(self):
-        Image : self.image = None
+        pass
 
-    def setImage(self, image : Image):
-        self.image = image
-
-    def buildComponent(self, comp_type : str):
-        if comp_type in self.CHANNEL_FILTERS:
-            return self.buildFilterComponent(comp_type)
-        
-        elif comp_type in self.COMPONENT_FILTERS:
-            return self.buildGraphicalComponent(comp_type)
-        
-        elif comp_type in self.EDGE_DENOIS_FILTERS:
-            return self.buildEdgeDenoisComponent(comp_type)
-
-    def buildGraphicalComponent(self, comp_type, pos):
-        if comp_type == "title":
-            return self.buildTitleComponent(pos)
-        elif comp_type == "histogram":
-            return self.buildHistogramComponent(pos)
-
-    def buildFilterComponent(self, comp_type:str):
-        if comp_type == "single":
-            f = input("Enter the threshold value: ")
-            c = input("Enter the channel number: ")
-            return self.buildSingleChannelFilter(f, c)
-        elif comp_type == "all":
-            f = input("Enter the first threshold value: ")
-            s = input("Enter the second threshold value: ")
-            t = input("Enter the third threshold value: ")
-            return self.buildAllChannelsFilter(f, s, t)
-        
-    def buildEdgeDenoisingComponent(self, comp_type:str):
-        f = input("Enter the kernel size: ")
-        if comp_type == "laplacian":
-            return self.buildLaplacianFilter(f)
-        elif comp_type == "gauss_blur":
-            return self.buildGaussianBlurFilter(f)
-
-    def buildTitleComponent(self, pos):
-        return TitleComponent(pos, self.image.name)
+    def buildTitleComponent(self, pos, title):
+        return TitleComponent(pos, title)
     
-    def buildHistogramComponent(self, pos):
-        return HistogramComponent(self.image.get_histogram_img())
+    def build2DHistogramComponent(self, hist):
+        return HistogramComponent(hist)
+    
+    def build3DHistogramComponent(self, hist):
+        return HistogramComponent(hist)
     
     def buildSingleChannelFilter(self, f: float, c: int):
         return SingleChannelFilter(partial(cv2.threshold, thresh=f, maxval = 255, type = cv2.THRESH_BINARY), c)
@@ -74,8 +36,11 @@ class ComponentBuilder:
         return MultiChannelFilter(partial(multichanfilter, f=f,s=s,t=t))
     
     def buildLaplacianFilter(self,f):
-        return EdgeDenoisingComponent(partial(cv2.Laplacian, ddepth=cv2.CV_64F, ksize=f))
+        return Filter(partial(cv2.Laplacian, ddepth=cv2.CV_64F, ksize=f))
     
-    def buildGaussianBlurFilter(self,f):
-        return EdgeDenoisingComponent(partial(cv2.GaussianBlur, ksize=f))
+    def buildGaussianBlurFilter(self,f,sx, sy):
+        return Filter(partial(cv2.GaussianBlur, ksize=f, sigmaX=sx, sigmaY=sy))
+    
+    def buildCannyFilter(self, th1:int, th2:int):
+        return Filter(partial(cv2.Canny, threshold1=th1, threshold2=th2))
     

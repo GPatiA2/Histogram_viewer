@@ -79,6 +79,9 @@ class ComandParser:
             size = (args[1])
             return OpeningCommand(size)
         
+        elif args[0] == "next":
+            return NextImageCommand()
+
         else:
             print("Got invalid comand: " + comand)
 

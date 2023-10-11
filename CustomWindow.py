@@ -58,3 +58,8 @@ class CustomWindow():
     def push_visible(self):
         self.last_visible += 1
         self.elements[self.last_visible].visible = True
+
+    def next(self):
+        self.elements[self.last_visible].visible = False
+        self.last_visible += 1
+        self.elements[self.last_visible].visible = True

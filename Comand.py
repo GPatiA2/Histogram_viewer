@@ -2,6 +2,7 @@ from CustomWindow import CustomWindow
 from ComponentBuilder import ComponentBuilder
 from abc import ABC, abstractmethod
 from Image import Image
+from PIL import Image as PILImage
 
 class Comand():
 
@@ -20,7 +21,7 @@ class LoadImageCommand(Comand):
         self.name = None
 
     def execute(self, window : CustomWindow, builder : ComponentBuilder):
-        img = Image(self.path)
+        img = Image(self.path, is_tiff=False)
         window.load(img)
         self.name = img.name
 
@@ -208,4 +209,27 @@ class PushVisibleCommand(Comand):
 
     def execute(self, window : CustomWindow, builder : ComponentBuilder):
         window.push_visible()
+
+class LoadTiffCommand(Comand):
+
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+        self.name = None
+
+    def execute(self, window : CustomWindow, builder : ComponentBuilder):
+        img = Image(self.path, is_tiff=True)
+        window.load(img)
+        self.name = img.name
+
+class AddTempHistogramCommand(Comand):
+
+    def __init__(self, idx):
+        super().__init__()
+        self.idx = idx
+
+    def execute(self, window : CustomWindow, builder : ComponentBuilder):
+        hist = window.getTempHistogram(self.idx)
+        comp = builder.buildTempHistogramComponent(hist)
+        window.add(comp)
 

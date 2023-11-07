@@ -78,9 +78,14 @@ class ComandParser:
         elif args[0] == "opening":
             size = (args[1])
             return OpeningCommand(size)
+
+        elif args[0] == "load_tiff":
+            path = (args[1])
+            return LoadTiffCommand(path)
         
-        elif args[0] == "next":
-            return NextImageCommand()
+        elif args[0] == "temp_hist":
+            idx = int(args[1])
+            return AddTempHistogramCommand(idx)
 
         else:
             print("Got invalid comand: " + comand)

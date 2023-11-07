@@ -7,7 +7,7 @@ if __name__ == '__main__':
     
     parser = ComandParser()
     builder = ComponentBuilder()
-    window = CustomWindow()
+    window = CustomWindow('bad_pannels.json')
     frame = Frame("Frame", (1920, 1080), builder, window, parser)
     frame.setup()
     

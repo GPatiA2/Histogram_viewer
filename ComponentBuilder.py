@@ -19,6 +19,9 @@ class ComponentBuilder:
     def build3DHistogramComponent(self, hist):
         return HistogramComponent(hist)
     
+    def buildTempHistogramComponent(self, hist):
+        return HistogramComponent(hist)
+    
     def buildSingleChannelFilter(self, f: float, c: int):
         return SingleChannelFilter(partial(cv2.threshold, thresh=f, maxval = 255, type = cv2.THRESH_BINARY), c)
     

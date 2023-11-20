@@ -39,6 +39,12 @@ class CustomWindow():
 
     def get_name(self) -> str:
         return self.image.name
+    
+    def get_thermal(self) -> np.array:
+        return self.image.get_thermal()
+    
+    def crop(self, img, idx) -> np.array:
+        return self.image.crop_bbox(img, idx)
 
     def get2DHistogram(self) -> np.array:
         return self.image.get2DHistogram()

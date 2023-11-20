@@ -54,9 +54,7 @@ class Image():
         io_buf.close()
         return img_arr
     
-    def getTempHistogram(self, idx) -> np.array:
-
-        im = cv2.cvtColor(deepcopy(self.image), cv2.COLOR_BGR2GRAY)
+    def get_thermal(self) -> np.array:
 
         thermal = Thermal(
             dirp_filename='plugins/dji_thermal_sdk_v1.1_20211029/linux/release_x64/libdirp.so',
@@ -68,15 +66,30 @@ class Image():
 
         temperature = thermal.parse_dirp2(self.path)
 
+        return temperature
+    
+    def crop_bbox(self, img : np.array, idx : int) -> np.array:
+
         rect = cv2.boundingRect(np.array(self.pannels[idx]["bbox"]))
         rect = np.int0(rect)
-        temperature = temperature[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]
+        img = img[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2]]
 
-        dim = max(temperature.shape[0], temperature.shape[1])
-        pad_im = np.zeros((dim,dim))
-        pad_im[:temperature.shape[0], :temperature.shape[1]] = temperature
+        return img, rect
+    
+    def getTempHistogram(self, idx) -> np.array:
 
-        mean = np.max(temperature)
+        im = cv2.cvtColor(deepcopy(self.image), cv2.COLOR_BGR2GRAY)
+
+        temperature = self.get_thermal()
+
+        crop_pannel, rect = self.crop_bbox(temperature, idx)
+
+        dim = max(crop_pannel.shape[0], crop_pannel.shape[1])
+        pad_im = np.zeros((crop_pannel.shape[0],crop_pannel.shape[1]))
+        pad_im[:crop_pannel.shape[0], :crop_pannel.shape[1]] = crop_pannel
+        pad_im[pad_im < 23.5] = None
+
+        mean = np.max(crop_pannel)
 
         xx, yy = np.mgrid[0:pad_im.shape[0], 0:pad_im.shape[1]]
 
@@ -87,9 +100,10 @@ class Image():
 
         mean = np.ones_like(pad_im) * mean
 
-        ax.plot_surface(xx, yy, mean, cmap = plt.cm.Blues_r)
+
+        # ax.plot_surface(xx, yy, mean, cmap = plt.cm.Blues_r)
         # ax.plot_surface(xx, yy, mean + 10, cmap = plt.cm.Greens_r)
-        ax.plot_surface(xx, yy, mean - 10, cmap = plt.cm.Reds_r)
+        # ax.plot_surface(xx, yy, mean - 10, cmap = plt.cm.Reds_r)
 
         elev = 5
         azim = 45
@@ -98,13 +112,33 @@ class Image():
         ax.view_init(elev, azim, roll)
         ax.set_facecolor((.3,.3,.3))
 
+        print("MAX IN PANNEL = ", np.max(crop_pannel[crop_pannel > 23.5]))
+        print("MIN IN PANNEL = ", np.min(crop_pannel[crop_pannel > 23.5]))
+
+        plt.show()
+
         io_buf = io.BytesIO()
         fig.savefig(io_buf, format='raw', dpi = 100)
         io_buf.seek(0)
         img_arr = np.reshape(np.frombuffer(io_buf.getvalue(), dtype=np.uint8),
                             newshape=(int(fig.bbox.bounds[3]), int(fig.bbox.bounds[2]), -1))
         io_buf.close()
-        return img_arr
+
+        im = im[:,:,None]
+        pannel = np.zeros_like(img_arr)
+        pannel[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2], :] = im[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2], :]
+
+        print(pannel.shape)
+        print(img_arr.shape)
+
+        # im = im[:,:,None]
+        # pannel = np.zeros((rect[3], rect[2], img_arr.shape[2]))
+        # pannel[:,:,:] = im[rect[1]:rect[1]+rect[3], rect[0]:rect[0]+rect[2], :]
+        # pannel = cv2.resize(pannel, (int((img_arr.shape[0] / pannel.shape[0]) * pannel.shape[1]), img_arr.shape[0]))
+
+        ret = np.concatenate((img_arr, pannel), axis=1) 
+
+        return ret
     
     def get3DHistogram(self) -> np.array:
         im = cv2.cvtColor(deepcopy(self.image), cv2.COLOR_BGR2GRAY)

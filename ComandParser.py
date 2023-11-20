@@ -86,6 +86,11 @@ class ComandParser:
         elif args[0] == "temp_hist":
             idx = int(args[1])
             return AddTempHistogramCommand(idx)
+        
+        elif args[0] == "local_max":
+            pannel = int(args[1])
+            size   = int(args[2])
+            return LocalMaxFilterCommand(size, pannel)
 
         else:
             print("Got invalid comand: " + comand)

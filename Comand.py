@@ -233,3 +233,16 @@ class AddTempHistogramCommand(Comand):
         comp = builder.buildTempHistogramComponent(hist)
         window.add(comp)
 
+class LocalMaxFilterCommand(Comand):
+
+    def __init__(self, size, idx):
+        super().__init__()
+        self.size = size
+        self.idx  = idx
+
+    def execute(self, window : CustomWindow, builder : ComponentBuilder):
+        thermal    = window.get_thermal()
+        crop, rect = window.crop(thermal, self.idx)
+        comp       = builder.buildLocalMaxFilter(crop, self.size)
+        window.add(comp)
+

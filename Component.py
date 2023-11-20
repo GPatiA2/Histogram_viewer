@@ -62,4 +62,5 @@ class NumberComponent(Component):
     def show(self, img) -> np.array:
         img = cv2.putText(img, self.num + ": " + str(self.val), self.pos, cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
+    
 

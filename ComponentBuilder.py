@@ -47,3 +47,23 @@ class ComponentBuilder:
     def buildCannyFilter(self, th1:int, th2:int):
         return Filter(partial(cv2.Canny, threshold1=th1, threshold2=th2))
     
+    def buildLocalMaxFilter(self, crop, thermalsize:int):
+
+        def localmaxfilter(img, crop, thermalsize):
+            
+            mcrop = crop.copy()
+            mcrop = cv2.dilate(mcrop, np.ones((thermalsize, thermalsize), np.uint8))
+            
+            highlight = np.zeros(crop.shape, np.uint8)
+            highlight[mcrop == crop] = 255
+
+            crop2 = np.stack((highlight,crop,crop), axis=-1)
+
+            crop3c = np.stack((crop,crop,crop), axis=-1)
+
+            ret = np.uint8(np.concatenate((crop3c, crop2), axis=1))
+
+            return ret
+
+        return Filter(partial(localmaxfilter, crop=crop, thermalsize=thermalsize))
+    
